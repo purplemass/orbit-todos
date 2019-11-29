@@ -11,7 +11,7 @@
   const userNameDom = document.getElementById('username');
 
   addEventListeners();
-  setTimeout(() => getTodos(), 1000);
+  setTimeout(() => refreshUI(), 100);
 
   function refresh() {
     todosDom.innerHTML = '';
@@ -24,16 +24,60 @@
 
   function addEventListeners() {
     newTodoDom.addEventListener('keypress', newTodoKeyPressHandler, false);
-    document.getElementById('purge').addEventListener('click', purge.bind(this));
-    document.getElementById('getTodos').addEventListener('click', () => getTodos(this));
-    document.getElementById('addBob').addEventListener('click', () => addBob(this));
+    document.getElementById('syncIt').addEventListener('click', () => syncIt(this));
+    document.getElementById('deactivate').addEventListener('click', () => deactivate(this));
+    document.getElementById('refreshUI').addEventListener('click', () => refreshUI(this));
+    // document.getElementById('purge').addEventListener('click', purge.bind(this));
   }
 
   // -------------------------------------------------------------------
   // Actions
   // -------------------------------------------------------------------
 
-  const getTodos = async () => {
+  const syncIt = async () => {
+    const planets = await remote.query(q => q.findRecords("planet").sort("name"));
+    console.log("remote:", planets.length);
+    if (planets) refresh();
+    planets
+      // .map(p => ({...p, id: p.attributes.uuid}))
+      .forEach(p => UI(p));
+
+    // const transforms = await remote.pull(q => q.findRecords('planet'));
+    // transforms.forEach(transform => {
+    //   transform.operations.forEach(operation => {
+    //     operation.record.id = operation.record.attributes.uuid;
+    //   });
+    // });
+    // await memory.sync(transforms);
+    // refreshUI();
+
+    // const planets = await remote.query(q => q.findRecords("planet").sort("name"));
+    // console.log("remote:", planets.length);
+    // if (planets) refresh();
+    // planets.forEach(p => UI(p));
+
+    // backup.pull((q) => q.findRecords())
+    //   .then((transform) => {
+    //     transform.forEach(tr => {
+    //       tr.operations.forEach(op => {
+    //         console.log(op);
+    //         if (op.op === 'addRecord') {
+    //           console.log(op);
+    //           console.log('addRecord');
+    //           op.record.id = null;
+    //         }
+    //         // remote.push(op);
+    //       })
+    //     })
+    //   })
+    //   .then(() => refreshUI());
+    // remote.pull((q) => q.findRecords())
+    //   .then((transform) => remote.sync(transform))
+    //   // .then((transform) => console.log(transform))
+    //   // .then(() => refreshUI());
+  };
+
+  const refreshUI = async () => {
     // console.clear();
     refresh();
     let planets = await memory.query(q => q.findRecords("planet").sort("name"));
@@ -46,7 +90,7 @@
     // planets.forEach(p => UI(p));
   }
 
-  const addBob = async() => {
+  const deactivate = async() => {
     console.log('p');
     await coordinator.deactivate()
 
@@ -64,19 +108,19 @@
     const todo = {
       type: "planet",
       attributes: {
-        uuid: null,
         name: text,
         classification: "terrestrial",
         atmosphere: true
       }
     };
-    todo.attributes.uuid = todo.id;
+    // todo.attributes.uuid = todo.id;
     await memory.update(t => t.addRecord(todo))
-    getTodos();
+    refreshUI();
   }
 
   const deleteButtonPressed = async (todo) => {
-    document.getElementById('li_' + todo.id).style.display = "none"
+    document.getElementById('li_' + todo.id).style.display = "none";
+    console.log(todo);
     await memory.update(t => t.removeRecord(todo))
   }
 
@@ -146,7 +190,16 @@
 
     var label = document.createElement('label');
     label.appendChild( document.createTextNode(todo.attributes.name));
-    label.innerHTML = '<strong>' + todo.attributes.name + '</strong> <small>' + todo.id + '</small>';
+    let remoteId = '';
+    if (todo.keys) remoteId = todo.keys.remoteId;
+    let copy = '<strong>' + todo.attributes.name + '</strong>';
+    copy += ' ';
+    copy += '<small>' + todo.id + '</small>';
+    copy += ' | ';
+    copy += '<small>' + remoteId + '</small>';
+    // copy += ' | ';
+    // copy += '<small>' + remoteId + '</small>';
+    label.innerHTML = copy;
     label.addEventListener('dblclick', todoDblClicked.bind(this, todo));
 
     var deleteLink = document.createElement('button');

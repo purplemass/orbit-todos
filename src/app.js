@@ -1,6 +1,6 @@
-import { Schema, NetworkError } from "@orbit/data";
+import { KeyMap, NetworkError, Schema } from "@orbit/data";
 import IndexedDBSource from "@orbit/indexeddb";
-import JSONAPISource from '@orbit/jsonapi';
+import JSONAPISource, { JSONAPISerializer } from '@orbit/jsonapi';
 import MemorySource from "@orbit/memory";
 import { EventLoggingStrategy } from "@orbit/coordinator";
 
@@ -17,6 +17,9 @@ const schema = new Schema({
       },
       relationships: {
         moons: { type: "hasMany", model: "moon", inverse: "planet" }
+      },
+      keys: {
+        remoteId: { type: "string" }
       }
     },
     moon: {
@@ -25,11 +28,21 @@ const schema = new Schema({
       },
       relationships: {
         planet: { type: "hasOne", model: "planet", inverse: "moons" }
+      },
+      keys: {
+        remoteId: { type: "string" }
       }
     }
   }
 });
 
+class CustomJSONAPISerializer extends JSONAPISerializer {
+  resourceKey(type) {
+    return 'remoteId';
+  }
+}
+
+const keyMap = new KeyMap();
 const memory = new MemorySource({ schema });
 const backup = new IndexedDBSource({
   schema,
@@ -38,22 +51,24 @@ const backup = new IndexedDBSource({
 });
 const remote = new JSONAPISource({
   schema,
+  keyMap,
   name: "remote",
   host: 'http://localhost:8000',
+  SerializerClass: CustomJSONAPISerializer
 });
 const coordinator = new Coordinator({
   sources: [memory, remote, backup, ]
 });
 
 window.memory = memory;
+window.backup = backup;
 window.remote = remote;
 window.coordinator = coordinator;
 
 // coordinator.addStrategy(new EventLoggingStrategy());
 
-const bobStrategy = new RequestStrategy({
-  name: 'bob-strategy',
-
+const someStrategy = new RequestStrategy({
+  name: 'some-strategy',
   source: 'memory',
   on: 'beforeQuery',
   target: 'remote',
@@ -70,19 +85,6 @@ const bobStrategy = new RequestStrategy({
   }
 });
 
-// const pushFailMemoryStrategy = new RequestStrategy({
-//   name: "memory-push-fail",
-//   source: "memory",
-//   on: "push",
-//   action() {
-//     console.log('pushFailMemory');
-//     this.source.requestQueue.skip();
-//     setTimeout(() => this.source.requestQueue.retry(), 1000);
-//   },
-//   catch(e) {
-//     console.log('MEMORY.QUERIED');
-//   }
-// });
 const pushFailStrategy = new RequestStrategy({
   name: "remote-push-fail",
   source: "remote",
@@ -111,41 +113,41 @@ const pullFailStrategy = new RequestStrategy({
   }
 });
 
-coordinator.addStrategy(bobStrategy);
-coordinator.addStrategy(pushFailStrategy);
-// coordinator.addStrategy(pushFailMemoryStrategy);
-coordinator.addStrategy(pullFailStrategy);
-
 // Update the remote server whenever memory is updated
-coordinator.addStrategy(new RequestStrategy({
+const memoryRemoteStrategy = new RequestStrategy({
   source: 'memory',
   on: 'beforeUpdate',
   target: 'remote',
   // action: 'push',
   blocking: true,
   action(transform, e) {
-    console.log('gere');
+    console.log('action.push');
     if (e instanceof NetworkError) {
       // this.source.requestQueue.skip();
       setTimeout(() => this.source.requestQueue.retry(), 5000);
     } else {
+      transform.operations.forEach(operation => {
+        if (operation.op === 'addRecord') {
+          operation.record.attributes.uuid = operation.record.id;
+        }
+      });
       this.target.push(transform).catch(() => {
-      console.log('pop');
-    });;
+        console.log('Error when pushing');
+    });
     }
   },
   catch(e) {
-    console.log('memory.updated');
+    console.log('memoryRemoteStrategy');
   }
-}));
+});
 
 // Sync all changes received from the remote server to the memory
 coordinator.addStrategy(new SyncStrategy({
   source: 'remote',
   target: 'memory',
-  blocking: false,
+  blocking: true,
   catch(e) {
-    console.log('memory -> remote');
+    console.log('remote -> memory');
   }
 }));
 
@@ -155,7 +157,7 @@ coordinator.addStrategy(new SyncStrategy({
   target: 'remote',
   blocking: false,
   catch(e) {
-    console.log('remote -> memory');
+    console.log('memory -> remote');
   }
 }));
 
@@ -164,15 +166,53 @@ coordinator.addStrategy(new SyncStrategy({
   source: 'memory',
   target: 'backup',
   blocking: false,
+  action(transform, e) {
+    console.log('ppp');
+    this.target.sync(transform).catch(() => {
+      console.log('Error when pushing');
+    });
+  },
   catch(e) {
     console.log('memory -> backup');
   }
 }));
 
+// coordinator.addStrategy(someStrategy);
+coordinator.addStrategy(pushFailStrategy);
+coordinator.addStrategy(pullFailStrategy);
+// coordinator.addStrategy(pushFailMemoryStrategy);
+coordinator.addStrategy(memoryRemoteStrategy);
+
 // let transform = await backup.pull(q => q.findRecords());
 
 const loadData = async () => {
 
+  // Restore data from IndexedDB upon launch
+  // const restore = backup.pull((q) => q.findRecords())
+  //   .then((transform) => memory.sync(transform))
+  //   .then(() => coordinator.activate())
+  //   .then(() => {
+  //     memory.query(q => q.findRecords("planet").sort("name"));
+  //   });
+  const transform = await backup.pull(q => q.findRecords());
+  await memory.sync(transform);
+  await coordinator.activate();
+  // await remote.pull(q => q.findRecords('planet'));
+};
+
+(function() {
+  loadData();
+})();
+
+/*
+SET HEADER:
+https://github.com/orbitjs/orbit/issues/454
+remote.defaultFetchHeaders.Authorization = `Bearer ${json.token}`;
+
+ACTIONS:
+queryFail pushFail pullFail updateFail syncFail
+
+KEEP:
   // Restore data from IndexedDB upon launch
   const restore = backup.pull((q) => q.findRecords())
     .then((transform) => memory.sync(transform))
@@ -181,85 +221,12 @@ const loadData = async () => {
       memory.query(q => q.findRecords("planet").sort("name"));
     });
 
-  // let transform = await backup.pull(q => q.findRecords());
-  // await memory.sync(transform);
-  // await coordinator.activate();
-};
-
-
-(function() {
-  loadData();
- })();
-
-const addPlanets = async () => {
-  await memory.update(t => [
-    t.addRecord(venus),
-    t.addRecord(earth),
-    // t.addRecord(theMoon)
-  ]);
-}
-
-
-/*
-const planet = {
-  type: "planet",
-  id: "22",
-  attributes: {
-    name: "local",
-    classification: "terrestrial",
-    atmosphere: false
-  }
-};
-
-await memory.update(t => t.addRecord(planet))
-await memory.update(t => t.updateRecord(planet))
-
-planets = await remote.query(q => q.findRecords("planet").sort("name"));
-planets.forEach(p => console.log(p, p.id, p.attributes.name, p.attributes.classification))
-
-planets = await memory.query(q => q.findRecords("planet").sort("name"));
-planets.forEach(p => console.log(p, p.id, p.attributes.name, p.attributes.classification))
-*/
-
-/*
-SET HEADER:
-https://github.com/orbitjs/orbit/issues/454
-remote.defaultFetchHeaders.Authorization = `Bearer ${json.token}`;
-*/
-
-/*
-  action2: function(query, e) {
-    console.log('=========> action');
-    console.log(query);
-    console.log(e);
-    this.source.requestQueue.skip().catch((e) => {
-      console.log('retry');
-      console.log(e);
-    });
-  },
-
-  action1(transform, e) {
-    // console.log(transform);
-    // console.log(e);
-    if (e) {
-      // setTimeout(() => this.source.requestQueue
-      //   .retry().catch(e => console.log(e)), 1000);
-
-      // this.source.requestQueue.retry().catch(e) => {
-      //   console.log('retry');
-      //   console.log(e);
-      // };
-      // this.target.push(transform).catch((e) => {
-      //   console.log('Swallow all rejections.');
-      //   console.log(e);
-      // });
-      // console.log('memory.queried');
-      // console.log(this.target.syncQueue);
-      // this.target.syncQueue.retry();
-      // this.target.requestQueue.retry();
-      // setTimeout(() => this.target.requestQueue.retry(), 500);
+  memory.cache.on('patch', (operation) => {
+    console.log(operation);
+    if (operation.op === 'addRecord') {
+      console.log('addRecord');
+      operation.record.id = null;
     }
-  },
-  */
-
-// queryFail pushFail pullFail updateFail syncFail
+    return remote.push(operation)
+  });
+*/
