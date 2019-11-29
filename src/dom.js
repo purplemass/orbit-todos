@@ -51,7 +51,6 @@
 
   const deleteButtonPressed = async (todo) => {
     document.getElementById('li_' + todo.id).style.display = "none";
-    console.log(todo);
     await memory.update(t => t.removeRecord(todo))
   }
 
@@ -61,7 +60,6 @@
   }
 
   const todoBlurred = async (todo, event) => {
-    console.log('todoBlurred', todo);
     const trimmedText = event.target.value.trim();
     if (!trimmedText) {
       deleteButtonPressed(todo);
@@ -79,6 +77,7 @@
     if (event.keyCode === ENTER_KEY) {
       const inputEditTodo = document.getElementById('input_' + todo.id);
       inputEditTodo.blur();
+      refreshUI();
     }
   }
 
@@ -91,8 +90,8 @@
 
   // User has double clicked a todo, display an input so they can edit the name
   function todoDblClicked(todo) {
-    var div = document.getElementById('li_' + todo.id);
-    var inputEditTodo = document.getElementById('input_' + todo.id);
+    const div = document.getElementById('li_' + todo.id);
+    const inputEditTodo = document.getElementById('input_' + todo.id);
     div.className = 'editing';
     inputEditTodo.focus();
   }
