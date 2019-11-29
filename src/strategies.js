@@ -1,22 +1,17 @@
-import { NetworkError } from "@orbit/data";
+import { ClientError, NetworkError } from "@orbit/data";
 import { RequestStrategy, SyncStrategy } from "@orbit/coordinator";
 
 
-export const someStrategy = new RequestStrategy({
-  name: 'some-strategy',
+// Update the remote server whenever memory is updated
+export const remotePush = new RequestStrategy({
+  name: "remote-push-request",
   source: 'memory',
-  on: 'beforeQuery',
+  on: 'beforeUpdate',
   target: 'remote',
-  action: 'query',
-  blocking: false,
-
+  action: 'push',
+  blocking: true,
   catch(e) {
-    console.log('memory.queried');
-    if (e instanceof NetworkError) {
-      console.log('NetworkError');
-      // this.target.requestQueue.skip();
-      this.target.syncQueue.skip();
-    }
+    // errors caught by remotePushFail
   }
 });
 
@@ -26,54 +21,37 @@ export const remotePushFail = new RequestStrategy({
   on: "pushFail",
   action(transform, e) {
     console.log('remotePushFail');
+    if (e instanceof ClientError) {
+      console.log('skip task');
+      this.source.requestQueue.skip();
+    }
     if (e instanceof NetworkError) {
-      // this.source.requestQueue.skip();
+      console.log('retry');
       setTimeout(() => this.source.requestQueue.retry(), 5000);
     }
   },
   catch(e) {
-    console.error('remotePushFail: error');
+    console.log('remotePushFail: error');
   }
 });
+
 export const remotePullFail = new RequestStrategy({
   name: "remote-pull-fail",
   source: "remote",
   on: "pullFail",
   action(transform, e) {
     console.log('remotePullFail');
-    this.source.requestQueue.skip();
-  },
-  catch(e) {
-    console.error('remotePullFail: error');
-  }
-});
-
-// Update the remote server whenever memory is updated
-export const memoryRemoteRequest = new RequestStrategy({
-  name: "memory-remote-request",
-  source: 'memory',
-  on: 'beforeUpdate',
-  target: 'remote',
-  action: 'push',
-  blocking: true,
-  actionRemoved(transform, e) {
-    console.log('memoryRemoteRequest');
+    if (e instanceof ClientError) {
+      console.log('skip task');
+      this.source.requestQueue.skip();
+    }
     if (e instanceof NetworkError) {
-      // this.source.requestQueue.skip();
+      console.log('retry');
       setTimeout(() => this.source.requestQueue.retry(), 5000);
-    } else {
-      transform.operations.forEach(operation => {
-        if (operation.op === 'addRecord') {
-          operation.record.attributes.uuid = operation.record.id;
-        }
-      });
-      this.target.push(transform).catch(() => {
-        console.error('memoryRemoteRequest: error when pushing');
-    });
     }
   },
   catch(e) {
-    console.error('memoryRemoteRequest: error');
+    console.log('remotePullFail: error');
   }
 });
 
@@ -86,11 +64,11 @@ export const remoteMemorySync = new SyncStrategy({
   actionRemoved(transform, e) {
     console.log('remoteMemorySync');
     this.target.sync(transform).catch(() => {
-      console.error('remoteMemorySync: error when syncing');
+      console.log('remoteMemorySync: error when syncing');
     });
   },
   catch(e) {
-    console.error('remoteMemorySync: error');
+    console.log('remoteMemorySync: error');
   }
 });
 
@@ -103,11 +81,11 @@ export const memoryRemoteSync = new SyncStrategy({
   actionRemoved(transform, e) {
     console.log('memoryRemoteSync');
     this.source.sync(transform).catch(() => {
-      console.error('memoryRemoteSync: error when syncing');
+      console.log('memoryRemoteSync: error when syncing');
     });
   },
   catch(e) {
-    console.error('memoryRemoteSync: error');
+    console.log('memoryRemoteSync: error');
   }
 });
 
@@ -124,6 +102,25 @@ export const memoryBackupSync = new SyncStrategy({
     });
   },
   catch(e) {
-    console.error('memoryBackupSync: error');
+    console.log('memoryBackupSync: error');
+  }
+});
+
+// Untested strategy
+export const someStrategy = new RequestStrategy({
+  name: 'some-strategy',
+  source: 'memory',
+  on: 'beforeQuery',
+  target: 'remote',
+  action: 'query',
+  blocking: false,
+
+  catch(e) {
+    console.log('memory.queried');
+    if (e instanceof NetworkError) {
+      console.log('NetworkError');
+      // this.target.requestQueue.skip();
+      this.target.syncQueue.skip();
+    }
   }
 });

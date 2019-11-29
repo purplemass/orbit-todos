@@ -5,24 +5,21 @@ import MemorySource from "@orbit/memory";
 
 import { keyMap, schema, CustomJSONAPISerializer } from "./schema"
 import {
+  remotePush,
   remotePushFail,
   remotePullFail,
-  memoryRemoteRequest,
   remoteMemorySync,
   memoryRemoteSync,
   memoryBackupSync,
 } from "./strategies";
 
 
-window.memory = new MemorySource({
-  schema,
-  keyMap,
-});
+window.memory = new MemorySource({ schema, keyMap });
 window.backup = new IndexedDBSource({
   schema,
   keyMap,
   name: "backup",
-  namespace: "solarsystem",
+  namespace: "todos",
 });
 window.remote = new JSONAPISource({
   schema,
@@ -39,9 +36,9 @@ window.coordinator = new Coordinator({
 //   sources: ["remote"]
 // }));
 
-// coordinator.addStrategy(remotePushFail);
+coordinator.addStrategy(remotePushFail);
+coordinator.addStrategy(remotePush);
 // coordinator.addStrategy(remotePullFail);
-coordinator.addStrategy(memoryRemoteRequest);
 
 coordinator.addStrategy(remoteMemorySync);
 coordinator.addStrategy(memoryRemoteSync);
@@ -56,9 +53,7 @@ const loadData = async () => {
   // await remote.pull(q => q.findRecords('planet'));
 };
 
-(function() {
-  loadData();
-})();
+loadData();
 
 /*
 SET HEADER:
