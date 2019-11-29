@@ -4,105 +4,37 @@
   'use strict';
 
   const ENTER_KEY = 13;
-  var CREATE = false;
-  var initialised = false;
   const newTodoDom = document.getElementById('new-todo');
   const todosDom = document.getElementById('todo-list');
-  const userNameDom = document.getElementById('username');
 
   addEventListeners();
   setTimeout(() => refreshUI(), 100);
-
-  function refresh() {
-    todosDom.innerHTML = '';
-  }
-
-  function purge() {
-    localStorage.removeItem('gun/');
-    localStorage.removeItem('gun/gun/');
-  }
-
-  function addEventListeners() {
-    newTodoDom.addEventListener('keypress', newTodoKeyPressHandler, false);
-    document.getElementById('syncIt').addEventListener('click', () => syncIt(this));
-    document.getElementById('deactivate').addEventListener('click', () => deactivate(this));
-    document.getElementById('refreshUI').addEventListener('click', () => refreshUI(this));
-    // document.getElementById('purge').addEventListener('click', purge.bind(this));
-  }
 
   // -------------------------------------------------------------------
   // Actions
   // -------------------------------------------------------------------
 
+  const refreshUI = async () => {
+    const todos = await memory.cache.query(q => q.findRecords("planet").sort("name"));
+    console.log("memory:", todos.length);
+    refresh(todos);
+  }
+
   const syncIt = async () => {
-    const planets = await remote.query(q => q.findRecords("planet").sort("name"));
-    console.log("remote:", planets.length);
-    if (planets) refresh();
-    planets
-      // .map(p => ({...p, id: p.attributes.uuid}))
-      .forEach(p => UI(p));
-
-    // const transforms = await remote.pull(q => q.findRecords('planet'));
-    // transforms.forEach(transform => {
-    //   transform.operations.forEach(operation => {
-    //     operation.record.id = operation.record.attributes.uuid;
-    //   });
-    // });
-    // await memory.sync(transforms);
-    // refreshUI();
-
-    // const planets = await remote.query(q => q.findRecords("planet").sort("name"));
-    // console.log("remote:", planets.length);
-    // if (planets) refresh();
-    // planets.forEach(p => UI(p));
-
-    // backup.pull((q) => q.findRecords())
-    //   .then((transform) => {
-    //     transform.forEach(tr => {
-    //       tr.operations.forEach(op => {
-    //         console.log(op);
-    //         if (op.op === 'addRecord') {
-    //           console.log(op);
-    //           console.log('addRecord');
-    //           op.record.id = null;
-    //         }
-    //         // remote.push(op);
-    //       })
-    //     })
-    //   })
-    //   .then(() => refreshUI());
-    // remote.pull((q) => q.findRecords())
-    //   .then((transform) => remote.sync(transform))
-    //   // .then((transform) => console.log(transform))
-    //   // .then(() => refreshUI());
+    const todos = await remote.query(q => q.findRecords("planet").sort("name"));
+    console.log("remote:", todos.length);
+    refresh(todos);
   };
 
-  const refreshUI = async () => {
-    // console.clear();
-    refresh();
-    let planets = await memory.query(q => q.findRecords("planet").sort("name"));
-    console.log("memory:", planets.length);
-    planets.forEach(p => UI(p));
-
-    // planets = await remote.query(q => q.findRecords("planet").sort("name"));
-    // console.log("remote:", planets.length);
-    // if (planets) refresh();
-    // planets.forEach(p => UI(p));
-  }
-
   const deactivate = async() => {
-    console.log('p');
+    console.log('deactivate');
     await coordinator.deactivate()
-
-    // await coordinator.removeStrategy('bob-strategy');
-    // await coordinator.addStrategy(bobStrategy);
-
+    // await coordinator.removeStrategy('some-strategy');
+    // await coordinator.addStrategy(someStrategy);
     await coordinator.removeSource('remote');
     await coordinator.addSource(remote);
-
     await coordinator.activate();
   }
-
 
   const addTodo = async (text) => {
     const todo = {
@@ -113,7 +45,6 @@
         atmosphere: true
       }
     };
-    // todo.attributes.uuid = todo.id;
     await memory.update(t => t.addRecord(todo))
     refreshUI();
   }
@@ -168,18 +99,25 @@
 
   // -------------------------------------------------------------------
 
+  function addEventListeners() {
+    newTodoDom.addEventListener('keypress', newTodoKeyPressHandler, false);
+    document.getElementById('syncIt').addEventListener('click', () => syncIt(this));
+    document.getElementById('deactivate').addEventListener('click', () => deactivate(this));
+    document.getElementById('refreshUI').addEventListener('click', () => refreshUI(this));
+  }
+
+  function refresh(todos) {
+    todosDom.innerHTML = '';
+    todos
+      // .map(p => ({...p, id: p.attributes.uuid}))
+      .forEach(p => UI(p));
+
+  }
+
   function UI(todo, id) {
     if (todo) {
       todosDom.appendChild(createTodoListItem(todo));
     }
-  }
-
-  function redrawTodosUI(todos) {
-    todosDom.innerHTML = '';
-    todos.forEach(function(todo) {
-      // console.log(todo);
-      todosDom.appendChild(createTodoListItem(todo));
-    });
   }
 
   function createTodoListItem(todo) {

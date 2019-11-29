@@ -39,7 +39,7 @@ export const remotePullFail = new RequestStrategy({
   name: "remote-pull-fail",
   source: "remote",
   on: "pullFail",
-  action() {
+  action(transform, e) {
     console.log('remotePullFail');
     this.source.requestQueue.skip();
   },
@@ -54,9 +54,9 @@ export const memoryRemoteRequest = new RequestStrategy({
   source: 'memory',
   on: 'beforeUpdate',
   target: 'remote',
-  // action: 'push',
+  action: 'push',
   blocking: true,
-  action(transform, e) {
+  actionRemoved(transform, e) {
     console.log('memoryRemoteRequest');
     if (e instanceof NetworkError) {
       // this.source.requestQueue.skip();
@@ -83,7 +83,6 @@ export const remoteMemorySync = new SyncStrategy({
   source: 'remote',
   target: 'memory',
   blocking: true,
-  action: 'push',
   actionRemoved(transform, e) {
     console.log('remoteMemorySync');
     this.target.sync(transform).catch(() => {
@@ -101,7 +100,6 @@ export const memoryRemoteSync = new SyncStrategy({
   source: 'memory',
   target: 'remote',
   blocking: true,
-  // action: 'push',
   actionRemoved(transform, e) {
     console.log('memoryRemoteSync');
     this.source.sync(transform).catch(() => {
@@ -114,18 +112,18 @@ export const memoryRemoteSync = new SyncStrategy({
 });
 
 // Back up data to IndexedDB
-export const memeryBackupSync = new SyncStrategy({
+export const memoryBackupSync = new SyncStrategy({
   name: "memory-backup-sync",
   source: 'memory',
   target: 'backup',
   blocking: false,
-  // action(transform, e) {
-  //   console.log('memeryBackupSync');
-  //   this.target.sync(transform).catch(() => {
-  //     error.log('memeryBackupSync: error when syncing');
-  //   });
-  // },
+  actionRemoved(transform, e) {
+    console.log('memoryBackupSync');
+    this.target.sync(transform).catch(() => {
+      error.error('memoryBackupSync: error when syncing');
+    });
+  },
   catch(e) {
-    console.error('memeryBackupSync: error');
+    console.error('memoryBackupSync: error');
   }
 });

@@ -1,77 +1,57 @@
-import { KeyMap } from "@orbit/data";
+import Coordinator, { EventLoggingStrategy } from "@orbit/coordinator";
 import IndexedDBSource from "@orbit/indexeddb";
-import JSONAPISource, { JSONAPISerializer } from '@orbit/jsonapi';
+import JSONAPISource from '@orbit/jsonapi';
 import MemorySource from "@orbit/memory";
-import { EventLoggingStrategy } from "@orbit/coordinator";
 
-import Coordinator from "@orbit/coordinator";
-import { schema } from "./schema"
+import { keyMap, schema, CustomJSONAPISerializer } from "./schema"
 import {
-  someStrategy,
   remotePushFail,
   remotePullFail,
   memoryRemoteRequest,
   remoteMemorySync,
   memoryRemoteSync,
-  memeryBackupSync,
+  memoryBackupSync,
 } from "./strategies";
 
 
-class CustomJSONAPISerializer extends JSONAPISerializer {
-  resourceKey(type) {
-    return 'remoteId';
-  }
-}
-
-const keyMap = new KeyMap();
-const memory = new MemorySource({ schema });
-const backup = new IndexedDBSource({
+window.memory = new MemorySource({
   schema,
-  name: "backup",
-  namespace: "solarsystem"
+  keyMap,
 });
-const remote = new JSONAPISource({
+window.backup = new IndexedDBSource({
+  schema,
+  keyMap,
+  name: "backup",
+  namespace: "solarsystem",
+});
+window.remote = new JSONAPISource({
   schema,
   keyMap,
   name: "remote",
   host: 'http://localhost:8000',
   SerializerClass: CustomJSONAPISerializer
 });
-const coordinator = new Coordinator({
+window.coordinator = new Coordinator({
   sources: [memory, remote, backup, ]
 });
-
-window.memory = memory;
-window.backup = backup;
-window.remote = remote;
-window.coordinator = coordinator;
 
 // coordinator.addStrategy(new EventLoggingStrategy({
 //   sources: ["remote"]
 // }));
 
-// coordinator.addStrategy(someStrategy);
 // coordinator.addStrategy(remotePushFail);
 // coordinator.addStrategy(remotePullFail);
-// coordinator.addStrategy(memoryRemoteRequest);
+coordinator.addStrategy(memoryRemoteRequest);
 
 coordinator.addStrategy(remoteMemorySync);
 coordinator.addStrategy(memoryRemoteSync);
-coordinator.addStrategy(memeryBackupSync);
-
-// let transform = await backup.pull(q => q.findRecords());
+coordinator.addStrategy(memoryBackupSync);
 
 const loadData = async () => {
 
-  // Restore data from IndexedDB upon launch
-  // const restore = backup.pull((q) => q.findRecords())
-  //   .then((transform) => memory.sync(transform))
-  //   .then(() => coordinator.activate())
-  //   .then(() => {
-  //     memory.query(q => q.findRecords("planet").sort("name"));
-  //   });
   const transform = await backup.pull(q => q.findRecords());
   await memory.sync(transform);
+  // await memory.query(q => q.findRecords("planet").sort("name"));
   await coordinator.activate();
   // await remote.pull(q => q.findRecords('planet'));
 };
@@ -89,13 +69,35 @@ ACTIONS:
 queryFail pushFail pullFail updateFail syncFail
 
 KEEP:
-  // Restore data from IndexedDB upon launch
-  const restore = backup.pull((q) => q.findRecords())
-    .then((transform) => memory.sync(transform))
-    .then(() => coordinator.activate())
-    .then(() => {
-      memory.query(q => q.findRecords("planet").sort("name"));
+    const transforms = await remote.pull(q => q.findRecords('planet'));
+    transforms.forEach(transform => {
+      transform.operations.forEach(operation => {
+        operation.record.id = operation.record.attributes.uuid;
+      });
     });
+    await memory.sync(transforms);
+    refreshUI();
+
+    backup.pull((q) => q.findRecords())
+      .then((transform) => {
+        transform.forEach(tr => {
+          tr.operations.forEach(op => {
+            console.log(op);
+            if (op.op === 'addRecord') {
+              console.log(op);
+              console.log('addRecord');
+              op.record.id = null;
+            }
+            // remote.push(op);
+          })
+        })
+      })
+      .then(() => refreshUI());
+
+    remote.pull((q) => q.findRecords())
+      .then((transform) => remote.sync(transform))
+      // .then((transform) => console.log(transform))
+      .then(() => refreshUI());
 
   memory.cache.on('patch', (operation) => {
     console.log(operation);
@@ -105,4 +107,12 @@ KEEP:
     }
     return remote.push(operation)
   });
+
+  // Restore data from IndexedDB upon launch
+  const restore = backup.pull((q) => q.findRecords())
+    .then((transform) => memory.sync(transform))
+    .then(() => coordinator.activate())
+    .then(() => {
+      memory.query(q => q.findRecords("planet").sort("name"));
+    });
 */
