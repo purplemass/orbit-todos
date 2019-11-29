@@ -17,13 +17,14 @@
   const refreshUI = async () => {
     const todos = await memory.cache.query(q => q.findRecords("planet").sort("name"));
     console.log("memory:", todos.length);
-    refresh(todos);
+    todosDom.innerHTML = '';
+    todos.forEach(p => UI(p));
   }
 
   const syncIt = async () => {
     const todos = await remote.query(q => q.findRecords("planet").sort("name"));
     console.log("remote:", todos.length);
-    refresh(todos);
+    refreshUI();
   };
 
   const deactivate = async() => {
@@ -103,14 +104,6 @@
     document.getElementById('syncIt').addEventListener('click', () => syncIt(this));
     document.getElementById('deactivate').addEventListener('click', () => deactivate(this));
     document.getElementById('refreshUI').addEventListener('click', () => refreshUI(this));
-  }
-
-  function refresh(todos) {
-    todosDom.innerHTML = '';
-    todos
-      // .map(p => ({...p, id: p.attributes.uuid}))
-      .forEach(p => UI(p));
-
   }
 
   function UI(todo, id) {
