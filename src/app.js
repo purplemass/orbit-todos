@@ -1,40 +1,21 @@
-import { KeyMap, NetworkError, Schema } from "@orbit/data";
+import { KeyMap } from "@orbit/data";
 import IndexedDBSource from "@orbit/indexeddb";
 import JSONAPISource, { JSONAPISerializer } from '@orbit/jsonapi';
 import MemorySource from "@orbit/memory";
 import { EventLoggingStrategy } from "@orbit/coordinator";
 
-import Coordinator, { RequestStrategy, SyncStrategy } from "@orbit/coordinator";
+import Coordinator from "@orbit/coordinator";
+import { schema } from "./schema"
+import {
+  someStrategy,
+  remotePushFail,
+  remotePullFail,
+  memoryRemoteRequest,
+  remoteMemorySync,
+  memoryRemoteSync,
+  memeryBackupSync,
+} from "./strategies";
 
-const schema = new Schema({
-  models: {
-    planet: {
-      attributes: {
-        uuid: { type: "string" },
-        name: { type: "string" },
-        classification: { type: "string" },
-        atmosphere: { type: "boolean" }
-      },
-      relationships: {
-        moons: { type: "hasMany", model: "moon", inverse: "planet" }
-      },
-      keys: {
-        remoteId: { type: "string" }
-      }
-    },
-    moon: {
-      attributes: {
-        name: { type: "string" }
-      },
-      relationships: {
-        planet: { type: "hasOne", model: "planet", inverse: "moons" }
-      },
-      keys: {
-        remoteId: { type: "string" }
-      }
-    }
-  }
-});
 
 class CustomJSONAPISerializer extends JSONAPISerializer {
   resourceKey(type) {
@@ -65,123 +46,18 @@ window.backup = backup;
 window.remote = remote;
 window.coordinator = coordinator;
 
-// coordinator.addStrategy(new EventLoggingStrategy());
-
-const someStrategy = new RequestStrategy({
-  name: 'some-strategy',
-  source: 'memory',
-  on: 'beforeQuery',
-  target: 'remote',
-  action: 'query',
-  blocking: false,
-
-  catch(e) {
-    console.log('memory.queried');
-    if (e instanceof NetworkError) {
-      console.log('NetworkError');
-      // this.target.requestQueue.skip();
-      this.target.syncQueue.skip();
-    }
-  }
-});
-
-const pushFailStrategy = new RequestStrategy({
-  name: "remote-push-fail",
-  source: "remote",
-  on: "pushFail",
-  action(transform, e) {
-    console.log('pushFail');
-    if (e instanceof NetworkError) {
-      // this.source.requestQueue.skip();
-      setTimeout(() => this.source.requestQueue.retry(), 5000);
-    }
-  },
-  catch(e) {
-    console.log('pushFailStrategy');
-  }
-});
-const pullFailStrategy = new RequestStrategy({
-  name: "remote-pull-fail",
-  source: "remote",
-  on: "pullFail",
-  action() {
-    console.log('pullFail');
-    this.source.requestQueue.skip();
-  },
-  catch(e) {
-    console.log('pullFailStrategy');
-  }
-});
-
-// Update the remote server whenever memory is updated
-const memoryRemoteStrategy = new RequestStrategy({
-  source: 'memory',
-  on: 'beforeUpdate',
-  target: 'remote',
-  // action: 'push',
-  blocking: true,
-  action(transform, e) {
-    console.log('action.push');
-    if (e instanceof NetworkError) {
-      // this.source.requestQueue.skip();
-      setTimeout(() => this.source.requestQueue.retry(), 5000);
-    } else {
-      transform.operations.forEach(operation => {
-        if (operation.op === 'addRecord') {
-          operation.record.attributes.uuid = operation.record.id;
-        }
-      });
-      this.target.push(transform).catch(() => {
-        console.log('Error when pushing');
-    });
-    }
-  },
-  catch(e) {
-    console.log('memoryRemoteStrategy');
-  }
-});
-
-// Sync all changes received from the remote server to the memory
-coordinator.addStrategy(new SyncStrategy({
-  source: 'remote',
-  target: 'memory',
-  blocking: true,
-  catch(e) {
-    console.log('remote -> memory');
-  }
-}));
-
-// Sync all changes received from memory to the remote server
-coordinator.addStrategy(new SyncStrategy({
-  source: 'memory',
-  target: 'remote',
-  blocking: false,
-  catch(e) {
-    console.log('memory -> remote');
-  }
-}));
-
-// Back up data to IndexedDB
-coordinator.addStrategy(new SyncStrategy({
-  source: 'memory',
-  target: 'backup',
-  blocking: false,
-  action(transform, e) {
-    console.log('ppp');
-    this.target.sync(transform).catch(() => {
-      console.log('Error when pushing');
-    });
-  },
-  catch(e) {
-    console.log('memory -> backup');
-  }
-}));
+// coordinator.addStrategy(new EventLoggingStrategy({
+//   sources: ["remote"]
+// }));
 
 // coordinator.addStrategy(someStrategy);
-coordinator.addStrategy(pushFailStrategy);
-coordinator.addStrategy(pullFailStrategy);
-// coordinator.addStrategy(pushFailMemoryStrategy);
-coordinator.addStrategy(memoryRemoteStrategy);
+// coordinator.addStrategy(remotePushFail);
+// coordinator.addStrategy(remotePullFail);
+// coordinator.addStrategy(memoryRemoteRequest);
+
+coordinator.addStrategy(remoteMemorySync);
+coordinator.addStrategy(memoryRemoteSync);
+coordinator.addStrategy(memeryBackupSync);
 
 // let transform = await backup.pull(q => q.findRecords());
 
