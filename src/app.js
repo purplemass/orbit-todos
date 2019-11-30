@@ -9,7 +9,6 @@ import { keyMap, schema, CustomJSONAPISerializer } from "./schema"
 import {
   remotePush,
   remotePushFail,
-  remotePullFail,
   remoteMemorySync,
   memoryRemoteSync,
   memoryBackupSync,
@@ -43,8 +42,6 @@ window.queue = new TaskQueue(remote, { name: 'remote-queue', bucket, autoProcess
 
 coordinator.addStrategy(remotePushFail);
 coordinator.addStrategy(remotePush);
-// coordinator.addStrategy(remotePullFail);
-
 coordinator.addStrategy(remoteMemorySync);
 coordinator.addStrategy(memoryRemoteSync);
 coordinator.addStrategy(memoryBackupSync);
@@ -59,67 +56,3 @@ const loadData = async () => {
 };
 
 loadData();
-
-/*
-SET HEADER:
-https://github.com/orbitjs/orbit/issues/454
-remote.defaultFetchHeaders.Authorization = `Bearer ${json.token}`;
-
-ACTIONS:
-queryFail pushFail pullFail updateFail syncFail
-
-KEEP:
-    const transforms = await remote.pull(q => q.findRecords('planet'));
-    transforms.forEach(transform => {
-      transform.operations.forEach(operation => {
-        operation.record.id = operation.record.attributes.uuid;
-      });
-    });
-    await memory.sync(transforms);
-    refreshUI();
-
-    backup.pull((q) => q.findRecords())
-      .then((transform) => {
-        transform.forEach(tr => {
-          tr.operations.forEach(op => {
-            console.log(op);
-            if (op.op === 'addRecord') {
-              console.log(op);
-              console.log('addRecord');
-              op.record.id = null;
-            }
-            // remote.push(op);
-          })
-        })
-      })
-      .then(() => refreshUI());
-
-    remote.pull((q) => q.findRecords())
-      .then((transform) => remote.sync(transform))
-      // .then((transform) => console.log(transform))
-      .then(() => refreshUI());
-
-  memory.cache.on('patch', (operation) => {
-    console.log(operation);
-    if (operation.op === 'addRecord') {
-      console.log('addRecord');
-      operation.record.id = null;
-    }
-    return remote.push(operation)
-  });
-
-  // Restore data from IndexedDB upon launch
-  const restore = backup.pull((q) => q.findRecords())
-    .then((transform) => memory.sync(transform))
-    .then(() => coordinator.activate())
-    .then(() => {
-      memory.query(q => q.findRecords("planet").sort("name"));
-    });
-
-    await coordinator.deactivate()
-    // await coordinator.removeStrategy('some-strategy');
-    // await coordinator.addStrategy(someStrategy);
-    await coordinator.removeSource('remote');
-    await coordinator.addSource(remote);
-    await coordinator.activate();
-*/

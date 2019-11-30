@@ -38,26 +38,6 @@ export const remotePushFail = new RequestStrategy({
   }
 });
 
-export const remotePullFail = new RequestStrategy({
-  name: "remote-pull-fail",
-  source: "remote",
-  on: "pullFail",
-  action(transform, e) {
-    console.log('remotePullFail');
-    if (e instanceof ClientError) {
-      console.log('skip task');
-      this.source.requestQueue.skip();
-    }
-    if (e instanceof NetworkError) {
-      console.log('retry');
-      setTimeout(() => this.source.requestQueue.retry(), 5000);
-    }
-  },
-  catch(e) {
-    console.log('remotePullFail: error');
-  }
-});
-
 // Sync all changes received from the remote server to the memory
 export const remoteMemorySync = new SyncStrategy({
   name: "remote-memory-sync",
@@ -106,24 +86,5 @@ export const memoryBackupSync = new SyncStrategy({
   },
   catch(e) {
     console.log('memoryBackupSync: error');
-  }
-});
-
-// Untested strategy
-export const someStrategy = new RequestStrategy({
-  name: 'some-strategy',
-  source: 'memory',
-  on: 'beforeQuery',
-  target: 'remote',
-  action: 'query',
-  blocking: false,
-
-  catch(e) {
-    console.log('memory.queried');
-    if (e instanceof NetworkError) {
-      console.log('NetworkError');
-      // this.target.requestQueue.skip();
-      this.target.syncQueue.skip();
-    }
   }
 });
