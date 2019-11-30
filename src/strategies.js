@@ -26,8 +26,11 @@ export const remotePushFail = new RequestStrategy({
       this.source.requestQueue.skip();
     }
     if (e instanceof NetworkError) {
-      console.log('retry');
-      setTimeout(() => this.source.requestQueue.retry(), 5000);
+      console.log('add task to queue');
+      if (this.source.requestQueue.current) {
+        queue.push(this.source.requestQueue.current);
+      }
+      this.source.requestQueue.skip();
     }
   },
   catch(e) {

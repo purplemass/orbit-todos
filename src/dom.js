@@ -14,8 +14,8 @@
   // Actions
   // -------------------------------------------------------------------
 
-  const refreshUI = async () => {
-    const todos = await memory.cache.query(q => q.findRecords("planet").sort("name"));
+  const refreshUI = () => {
+    const todos = memory.cache.query(q => q.findRecords("planet").sort("name"));
     console.log("memory:", todos.length);
     todosDom.innerHTML = '';
     todos.forEach(p => UI(p));
@@ -27,14 +27,11 @@
     refreshUI();
   };
 
-  const deactivate = async() => {
-    console.log('deactivate');
-    await coordinator.deactivate()
-    // await coordinator.removeStrategy('some-strategy');
-    // await coordinator.addStrategy(someStrategy);
-    await coordinator.removeSource('remote');
-    await coordinator.addSource(remote);
-    await coordinator.activate();
+  const processQueue = async() => {
+    console.log(`queue: ${queue.length}`);
+    if (queue.current) {
+      await queue.retry();
+    }
   }
 
   const addTodo = async (text) => {
@@ -102,8 +99,8 @@
   function addEventListeners() {
     newTodoDom.addEventListener('keypress', newTodoKeyPressHandler, false);
     document.getElementById('syncIt').addEventListener('click', () => syncIt(this));
-    document.getElementById('deactivate').addEventListener('click', () => deactivate(this));
     document.getElementById('refreshUI').addEventListener('click', () => refreshUI(this));
+    document.getElementById('processQueue').addEventListener('click', () => processQueue(this));
   }
 
   function UI(todo, id) {

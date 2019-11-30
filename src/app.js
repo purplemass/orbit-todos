@@ -1,7 +1,9 @@
 import Coordinator, { EventLoggingStrategy } from "@orbit/coordinator";
 import IndexedDBSource from "@orbit/indexeddb";
+import IndexedDBBucket from "@orbit/indexeddb-bucket";
 import JSONAPISource from '@orbit/jsonapi';
 import MemorySource from "@orbit/memory";
+import { TaskQueue } from "@orbit/core";
 
 import { keyMap, schema, CustomJSONAPISerializer } from "./schema"
 import {
@@ -31,6 +33,9 @@ window.remote = new JSONAPISource({
 window.coordinator = new Coordinator({
   sources: [memory, remote, backup, ]
 });
+
+const bucket = new IndexedDBBucket({ namespace: "remote-queue" });
+window.queue = new TaskQueue(remote, { name: 'remote-queue', bucket, autoProcess: false });
 
 // coordinator.addStrategy(new EventLoggingStrategy({
 //   sources: ["remote"]
@@ -110,4 +115,11 @@ KEEP:
     .then(() => {
       memory.query(q => q.findRecords("planet").sort("name"));
     });
+
+    await coordinator.deactivate()
+    // await coordinator.removeStrategy('some-strategy');
+    // await coordinator.addStrategy(someStrategy);
+    await coordinator.removeSource('remote');
+    await coordinator.addSource(remote);
+    await coordinator.activate();
 */
