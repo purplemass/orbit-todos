@@ -123,15 +123,9 @@
 
     var label = document.createElement('label');
     label.appendChild( document.createTextNode(todo.attributes.name));
-    let remoteId = '';
-    if (todo.keys) remoteId = todo.keys.remoteId;
+    let remoteId = todo.keys ? todo.keys.remoteId : 'xxx';
     let copy = '<strong>' + todo.attributes.name + '</strong>';
-    copy += ' ';
-    copy += '<small>' + todo.id + '</small>';
-    copy += ' | ';
-    copy += '<small>' + remoteId + '</small>';
-    // copy += ' | ';
-    // copy += '<small>' + remoteId + '</small>';
+    copy += ' <span class="remote-id">ID: ' + remoteId + '</span>';
     label.innerHTML = copy;
     label.addEventListener('dblclick', todoDblClicked.bind(this, todo));
 
