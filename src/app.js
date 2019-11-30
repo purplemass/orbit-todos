@@ -9,6 +9,7 @@ import { keyMap, schema, CustomJSONAPISerializer } from "./schema"
 import {
   remotePush,
   remotePushFail,
+  remoteQueryFail,
   remoteMemorySync,
   memoryRemoteSync,
   memoryBackupSync,
@@ -41,6 +42,7 @@ window.queue = new TaskQueue(remote, { name: 'remote-queue', bucket, autoProcess
 // }));
 
 coordinator.addStrategy(remotePushFail);
+coordinator.addStrategy(remoteQueryFail);
 coordinator.addStrategy(remotePush);
 coordinator.addStrategy(remoteMemorySync);
 coordinator.addStrategy(memoryRemoteSync);

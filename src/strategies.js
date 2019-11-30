@@ -32,9 +32,18 @@ export const remotePushFail = new RequestStrategy({
       }
       this.source.requestQueue.skip();
     }
-  },
-  catch(e) {
-    console.log('remotePushFail: error');
+  }
+});
+
+export const remoteQueryFail = new RequestStrategy({
+  name: "remote-query-fail",
+  source: "remote",
+  on: "queryFail",
+  action(transform, e) {
+    console.log('remoteQueryFail');
+    if (e instanceof NetworkError) {
+      this.source.requestQueue.skip();
+    }
   }
 });
 

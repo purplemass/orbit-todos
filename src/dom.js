@@ -8,33 +8,39 @@
   const todosDom = document.getElementById('todo-list');
 
   addEventListeners();
-  setTimeout(() => refreshUI(), 100);
+  setTimeout(() => refreshUI().then(() => syncIt()), 100);
 
   // -------------------------------------------------------------------
   // Actions
   // -------------------------------------------------------------------
 
-  const refreshUI = () => {
+  const refreshUI = async () => {
     const todos = memory.cache.query(q => q.findRecords("planet").sort("name"));
-    console.log("memory:", todos.length);
+    // console.log("memory:", todos.length);
     todosDom.innerHTML = '';
     todos.forEach(p => UI(p));
   }
 
   const syncIt = async () => {
-    const todos = await remote.query(q => q.findRecords("planet").sort("name"));
-    console.log("remote:", todos.length);
-    refreshUI();
+    await remote
+      .query(q => q.findRecords("planet").sort("name"))
+      .then(todos => console.log("remote:", todos.length))
+      .then(() => refreshUI())
+      .catch(e => {
+        // // errors caught by remoteQueryFail
+      });
   };
 
   const processQueue = async() => {
     console.log(`queue: ${queue.length}`);
     if (queue.current) {
       await queue.retry().catch(e => {
-        const status = e.response.status;
-        if (status === 400 || status === 405) {
-          console.log('error when retrying - skip [DATA LOSS?]');
-          queue.skip();
+        if (e.response) {
+          const status = e.response.status;
+          if (status === 400 || status === 405) {
+            console.log('error when retrying - skip [DATA LOSS?]');
+            queue.skip();
+          }
         }
       });
     }
@@ -87,6 +93,7 @@
 
   function newTodoKeyPressHandler( event ) {
     if (event.keyCode === ENTER_KEY) {
+      if (! newTodoDom.value) return;
       addTodo(newTodoDom.value);
       newTodoDom.value = '';
     }
