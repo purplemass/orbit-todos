@@ -30,7 +30,13 @@
   const processQueue = async() => {
     console.log(`queue: ${queue.length}`);
     if (queue.current) {
-      await queue.retry();
+      await queue.retry().catch(e => {
+        const status = e.response.status;
+        if (status === 400 || status === 405) {
+          console.log('error when retrying - skip [DATA LOSS?]');
+          queue.skip();
+        }
+      });
     }
   }
 
