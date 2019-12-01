@@ -57,4 +57,16 @@ const loadData = async () => {
   // await remote.pull(q => q.findRecords('planet'));
 };
 
+const loadServiceWorker = () => {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/service-worker.js')
+    .then((reg) => {
+      console.log('service worker scope: ' + reg.scope);
+    }).catch((error) => {
+      console.log('Could not register service worker', error);
+    });
+  }
+}
+
+loadServiceWorker();
 loadData();
