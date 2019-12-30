@@ -22,16 +22,19 @@
   }
 
   const syncIt = async () => {
+    const element = document.getElementById('syncIt');
+    element.classList.add('highlight');
     await remote
       .query(q => q.findRecords("todo").sort("name"))
       .then(todos => console.log("remote:", todos.length))
       .then(() => refreshUI())
+      .then(() => element.classList.remove('highlight'))
       .catch(e => {
-        // // errors caught by remoteQueryFail
+        // errors caught by remoteQueryFail
       });
   };
 
-  const processQueue = async() => {
+  const processQueue = async () => {
     console.log(`queue: ${queue.length}`);
     if (queue.current) {
       await queue.retry().catch(e => {

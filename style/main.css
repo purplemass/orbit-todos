@@ -2,5 +2,31 @@
 .remote-id {
   float: right;
   margin-right: 10%;
-  font-size: 1.2rem;
+  margin-top: 7px;
+  font-size: 0.8rem;
+}
+
+.top-buttons {
+  margin: 0 40%;
+}
+
+.button-big {
+  width: 150px;
+  padding: 5px;
+  background-color: #FFF;
+  color: #777;
+  cursor: pointer;
+  outline: none;
+}
+
+.highlight {
+  background-color: #000;
+}
+
+#refreshUI {
+  display: none;
+}
+
+#processQueue {
+  display: none;
 }
