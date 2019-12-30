@@ -12,30 +12,16 @@ export const keyMap = new KeyMap();
 
 export const schema = new Schema({
   models: {
-    planet: {
+    todo: {
       attributes: {
         uuid: { type: "string" },
         name: { type: "string" },
-        classification: { type: "string" },
-        atmosphere: { type: "boolean" }
-      },
-      relationships: {
-        moons: { type: "hasMany", model: "moon", inverse: "planet" }
+        done: { type: "boolean" },
+        deleted: { type: "boolean" }
       },
       keys: {
         remoteId: { type: "string" }
       }
     },
-    moon: {
-      attributes: {
-        name: { type: "string" }
-      },
-      relationships: {
-        planet: { type: "hasOne", model: "planet", inverse: "moons" }
-      },
-      keys: {
-        remoteId: { type: "string" }
-      }
-    }
   }
 });

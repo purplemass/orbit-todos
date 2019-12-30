@@ -28,6 +28,7 @@ window.remote = new JSONAPISource({
   keyMap,
   name: "remote",
   host: 'http://localhost:8000',
+  // host: 'http://jamshift.com:8080',
   SerializerClass: CustomJSONAPISerializer
 });
 window.coordinator = new Coordinator({
@@ -52,9 +53,9 @@ const loadData = async () => {
 
   const transform = await backup.pull(q => q.findRecords());
   await memory.sync(transform);
-  // await memory.query(q => q.findRecords("planet").sort("name"));
+  // await memory.query(q => q.findRecords("todo").sort("name"));
   await coordinator.activate();
-  // await remote.pull(q => q.findRecords('planet'));
+  // await remote.pull(q => q.findRecords('todo'));
 };
 
 const loadServiceWorker = () => {
@@ -68,5 +69,5 @@ const loadServiceWorker = () => {
   }
 }
 
-loadServiceWorker();
+// loadServiceWorker();
 loadData();

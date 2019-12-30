@@ -15,7 +15,7 @@
   // -------------------------------------------------------------------
 
   const refreshUI = async () => {
-    const todos = memory.cache.query(q => q.findRecords("planet").sort("name"));
+    const todos = memory.cache.query(q => q.findRecords("todo").sort("name"));
     // console.log("memory:", todos.length);
     todosDom.innerHTML = '';
     todos.forEach(p => UI(p));
@@ -23,7 +23,7 @@
 
   const syncIt = async () => {
     await remote
-      .query(q => q.findRecords("planet").sort("name"))
+      .query(q => q.findRecords("todo").sort("name"))
       .then(todos => console.log("remote:", todos.length))
       .then(() => refreshUI())
       .catch(e => {
@@ -48,11 +48,12 @@
 
   const addTodo = async (text) => {
     const todo = {
-      type: "planet",
+      type: "todo",
       attributes: {
         name: text,
         classification: "terrestrial",
-        atmosphere: true
+        done: false,
+        deleted: false
       }
     };
     await memory.update(t => t.addRecord(todo))
@@ -61,11 +62,12 @@
 
   const deleteButtonPressed = async (todo) => {
     document.getElementById('li_' + todo.id).style.display = "none";
-    await memory.update(t => t.removeRecord(todo))
+    todo.attributes.deleted = true;
+    await memory.update(t => t.updateRecord(todo));
   }
 
   const checkboxChanged = async (todo, event) => {
-    todo.attributes.atmosphere = event.target.checked;
+    todo.attributes.done = event.target.checked;
     await memory.update(t => t.updateRecord(todo));
   }
 
@@ -117,7 +119,7 @@
   }
 
   function UI(todo, id) {
-    if (todo) {
+    if (todo && todo.attributes.deleted === false) {
       todosDom.appendChild(createTodoListItem(todo));
     }
   }
@@ -158,7 +160,7 @@
     li.appendChild(divDisplay);
     li.appendChild(inputEditTodo);
 
-    if (todo.attributes.atmosphere) {
+    if (todo.attributes.done) {
       li.className += 'complete';
       checkbox.checked = true;
     }
