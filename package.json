@@ -1,5 +1,5 @@
 {
-  "name": "orbitjs-v015-store-forking-example",
+  "name": "QTRA-todos-orbitjs-store",
   "version": "1.0.0",
   "description": "",
   "main": "index.html",
@@ -8,18 +8,18 @@
     "build": "parcel build index.html"
   },
   "dependencies": {
-    "@orbit/coordinator": "0.16.3",
-    "@orbit/data": "0.16.3",
-    "@orbit/indexeddb": "0.16.3",
+    "@orbit/coordinator": "^0.16.4",
+    "@orbit/data": "^0.16.4",
+    "@orbit/indexeddb": "^0.16.4",
     "@orbit/indexeddb-bucket": "^0.16.3",
-    "@orbit/jsonapi": "^0.16.3",
-    "@orbit/memory": "^0.16.3",
-    "@orbit/store": "0.16.3"
+    "@orbit/jsonapi": "^0.16.4",
+    "@orbit/memory": "^0.16.4",
+    "@orbit/store": "^0.16.4"
   },
   "devDependencies": {
-    "@babel/core": "^7.7.4",
-    "@babel/plugin-transform-runtime": "^7.7.4",
-    "parcel-bundler": "^1.6.1"
+    "@babel/core": "^7.7.7",
+    "@babel/plugin-transform-runtime": "^7.7.6",
+    "parcel-bundler": "^1.12.4"
   },
   "keywords": [],
   "browserslist": [

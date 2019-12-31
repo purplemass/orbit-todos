@@ -13,6 +13,7 @@
 .button-big {
   width: 150px;
   padding: 5px;
+  margin: 0 0 10px;
   background-color: #FFF;
   color: #777;
   cursor: pointer;
