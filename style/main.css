@@ -7,17 +7,28 @@
 }
 
 .top-buttons {
-  margin: 0 40%;
+  margin: 0 20%;
 }
 
 .button-big {
   width: 150px;
-  padding: 5px;
+  padding: 10px;
   margin: 0 0 10px;
-  background-color: #FFF;
-  color: #777;
+  background-color: #777;
+  border-radius: .5rem;
+  border: 2px solid #e2e8f0;
+  color: #FFF;
+  font-weight: 500;
   cursor: pointer;
   outline: none;
+}
+
+.button-primary {
+  background-color: #4299e1;
+}
+
+.button-danger {
+  background-color: red;
 }
 
 .highlight {

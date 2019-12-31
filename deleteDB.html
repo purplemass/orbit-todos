@@ -1,0 +1,43 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+
+    <title>QTRA-todos</title>
+
+    <link rel="shortcut icon" href="images/favicon.ico"/>
+    <link rel="stylesheet" href="style/base.css">
+    <link rel="stylesheet" href="style/main.css">
+  </head>
+  <body>
+    <script type="text/javascript">
+      // Ref:
+      // https://developer.mozilla.org/en-US/docs/Web/API/IDBFactory#deleteDatabase
+      // https://github.com/dfahlander/Dexie.js/issues/508
+
+      (() => {
+
+        const goBack = (args) => {
+          console.log(args);
+          window.document.location = 'index.html';
+        };
+
+        const success = (args) => {
+          indexedDB.deleteDatabase('remote-queue');
+          setTimeout(() => goBack(args), 100);
+        };
+
+        const indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+
+        const dbRequest = indexedDB.deleteDatabase('todos');
+
+        dbRequest.addEventListener('success', (...args) => success(args));
+        dbRequest.addEventListener('error', (...args) => goBack(args));
+        dbRequest.addEventListener('upgradeneeded', (...args) => goBack(args));
+        // dbRequest.addEventListenerListener('blocked', (...args) => console.log(args));
+
+      })();
+
+    </script>
+  </body>
+</html>

@@ -8,7 +8,9 @@
   const todosDom = document.getElementById('todo-list');
 
   addEventListeners();
-  setTimeout(() => refreshUI().then(() => syncIt()), 100);
+  // setTimeout(() => refreshUI().then(() => syncIt()), 100);
+  setTimeout(() => refreshUI(), 100);
+  setTimeout(() => syncIt(), 500);
 
   // -------------------------------------------------------------------
   // Actions
