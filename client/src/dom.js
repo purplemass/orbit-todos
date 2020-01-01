@@ -17,8 +17,8 @@
   // -------------------------------------------------------------------
 
   const refreshUI = async () => {
-    const todos = memory.cache.query(q => q.findRecords("todo").sort("name"));
-    // console.log("memory:", todos.length);
+    const todos = memory.cache.query(q => q.findRecords('todo').sort('name'));
+    // console.log('memory:', todos.length);
     todosDom.innerHTML = '';
     todos.forEach(p => UI(p));
   }
@@ -29,8 +29,8 @@
     const element = document.getElementById('syncIt');
     element.classList.add('highlight');
     await remote
-      .query(q => q.findRecords("todo").sort("name"))
-      .then(todos => console.log("remote:", todos.length))
+      .query(q => q.findRecords('todo').sort('name'))
+      .then(todos => console.log('remote:', todos.length))
       .then(() => refreshUI())
       .then(() => element.classList.remove('highlight'))
       .catch(e => {
@@ -55,10 +55,9 @@
 
   const addTodo = async (text) => {
     const todo = {
-      type: "todo",
+      type: 'todo',
       attributes: {
         name: text,
-        classification: "terrestrial",
         done: false,
         deleted: false
       }
@@ -68,7 +67,7 @@
   }
 
   const deleteButtonPressed = async (todo) => {
-    document.getElementById('li_' + todo.id).style.display = "none";
+    document.getElementById('li_' + todo.id).style.display = 'none';
     todo.attributes.deleted = true;
     await memory.update(t => t.updateRecord(todo));
   }

@@ -1,10 +1,10 @@
-import { ClientError, NetworkError } from "@orbit/data";
-import { RequestStrategy, SyncStrategy } from "@orbit/coordinator";
+import { ClientError, NetworkError } from '@orbit/data';
+import { RequestStrategy, SyncStrategy } from '@orbit/coordinator';
 
 
 // Update the remote server whenever memory is updated
 export const remotePush = new RequestStrategy({
-  name: "remote-push-request",
+  name: 'remote-push-request',
   source: 'memory',
   on: 'beforeUpdate',
   target: 'remote',
@@ -16,9 +16,9 @@ export const remotePush = new RequestStrategy({
 });
 
 export const remotePushFail = new RequestStrategy({
-  name: "remote-push-fail",
-  source: "remote",
-  on: "pushFail",
+  name: 'remote-push-fail',
+  source: 'remote',
+  on: 'pushFail',
   action(transform, e) {
     console.log('remotePushFail');
     if (e instanceof ClientError) {
@@ -36,9 +36,9 @@ export const remotePushFail = new RequestStrategy({
 });
 
 export const remoteQueryFail = new RequestStrategy({
-  name: "remote-query-fail",
-  source: "remote",
-  on: "queryFail",
+  name: 'remote-query-fail',
+  source: 'remote',
+  on: 'queryFail',
   action(transform, e) {
     console.log('remoteQueryFail');
     if (e instanceof NetworkError) {
@@ -49,7 +49,7 @@ export const remoteQueryFail = new RequestStrategy({
 
 // Sync all changes received from the remote server to the memory
 export const remoteMemorySync = new SyncStrategy({
-  name: "remote-memory-sync",
+  name: 'remote-memory-sync',
   source: 'remote',
   target: 'memory',
   blocking: true,
@@ -66,7 +66,7 @@ export const remoteMemorySync = new SyncStrategy({
 
 // Sync all changes received from memory to the remote server
 export const memoryRemoteSync = new SyncStrategy({
-  name: "memory-remote-sync",
+  name: 'memory-remote-sync',
   source: 'memory',
   target: 'remote',
   blocking: true,
@@ -83,7 +83,7 @@ export const memoryRemoteSync = new SyncStrategy({
 
 // Back up data to IndexedDB
 export const memoryBackupSync = new SyncStrategy({
-  name: "memory-backup-sync",
+  name: 'memory-backup-sync',
   source: 'memory',
   target: 'backup',
   blocking: false,
