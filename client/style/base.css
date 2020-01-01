@@ -25,7 +25,8 @@ body {
   line-height: 1.4em;
   background: #eaeaea url('bg.png');
   color: #4d4d4d;
-  width: 550px;
+  width: 95%;
+  max-width: 550px;
   margin: 0 auto;
   -webkit-font-smoothing: antialiased;
   -moz-font-smoothing: antialiased;
@@ -37,13 +38,13 @@ body {
 #todoapp {
   background: #fff;
   background: rgba(255, 255, 255, 0.9);
-  margin: 90px 0 40px 0;
+  margin: 80px 0 40px 0;
   border: 1px solid #ccc;
   position: relative;
   border-top-left-radius: 2px;
   border-top-right-radius: 2px;
   box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.2),
-                0 25px 50px 0 rgba(0, 0, 0, 0.15);
+              0 25px 50px 0 rgba(0, 0, 0, 0.15);
 }
 
 #todoapp:before {
@@ -68,9 +69,9 @@ body {
 
 #todoapp h1 {
   position: absolute;
-  top: -90px;
+  top: -75px;
   width: 100%;
-  font-size: 55px;
+  font-size: 45px;
   font-weight: bold;
   text-align: center;
   color: #b3b3b3;
@@ -114,7 +115,7 @@ body {
   position: relative;
   margin: 0;
   width: 100%;
-  font-size: 24px;
+  font-size: 18px;
   font-family: inherit;
   line-height: 1.4em;
   border: 0;
@@ -181,7 +182,7 @@ label[for='toggle-all'] {
 
 #todo-list li {
   position: relative;
-  font-size: 24px;
+  font-size: 18px;
   border-bottom: 1px dotted #ccc;
 }
 
@@ -196,7 +197,7 @@ label[for='toggle-all'] {
 
 #todo-list li.editing .edit {
   display: block;
-  width: 506px;
+  width: 70%;
   padding: 13px 17px 12px 17px;
   margin: 0 0 0 43px;
 }
@@ -225,7 +226,8 @@ label[for='toggle-all'] {
 #todo-list li .toggle:after {
   content: '✓'; /* ✔ */
   line-height: 43px; /* 40 + a couple of pixels visual adjustment */
-  font-size: 20px;
+  font-size: 28px;
+  font-weight: bold;
   color: #d9d9d9;
   text-shadow: 0 -1px 0 #bfbfbf;
 }
@@ -258,7 +260,7 @@ label[for='toggle-all'] {
 #todo-list li .destroy {
   display: none;
   position: absolute;
-  top: 0;
+  top: 5px;
   right: 10px;
   bottom: 0;
   width: 40px;

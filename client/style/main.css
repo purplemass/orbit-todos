@@ -7,7 +7,8 @@
 }
 
 .top-buttons {
-  margin: 0 20%;
+  width: 100%;
+  text-align: center;
 }
 
 .button-big {
@@ -35,6 +36,10 @@
   background-color: #000;
 }
 
+#instructions {
+  font-size: 10px;
+}
+
 #refreshUI {
   display: none;
 }
@@ -44,6 +49,12 @@
 }
 
 #version-wrapper {
-  margin: -20px 5px 0 0;
+  position: fixed;
+  margin: -16px 5px 0 0;
   color: #777;
+  font-size: 10px;
+}
+
+#version {
+  font-weight: 500;
 }

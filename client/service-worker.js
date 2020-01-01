@@ -1,4 +1,4 @@
-const staticCacheName = '1.0.2';
+const staticCacheName = '1.0.3';
 const serverPrefix = '/todos/'
 
 let filesToCache = [
@@ -66,7 +66,7 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', event => {
-  log(`fetch ${event.request.url}`);
+  // log(`fetch ${event.request.url}`);
 
   sendVersion(event);
 
