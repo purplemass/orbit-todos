@@ -42,3 +42,8 @@
 #processQueue {
   display: none;
 }
+
+#version-wrapper {
+  margin: -20px 5px 0 0;
+  color: #777;
+}

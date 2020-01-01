@@ -1,4 +1,4 @@
-const staticCacheName = 'v1.0.0';
+const staticCacheName = '1.0.0';
 
 const filesToCache = [
   '/',
@@ -21,10 +21,6 @@ const filesToCache = [
   'service-worker.js',
   'service-worker.js.map',
 ];
-
-const log = (message) => {
-  console.log(`[${staticCacheName}] ${message}`);
-};
 
 self.addEventListener('install', event => {
   log('install');
@@ -53,8 +49,11 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', event => {
-  log(`fetch ${event.request.url}`);
+  // log(`fetch ${event.request.url}`);
 
+  sendVersion(event);
+
+  // handle caching
   event.respondWith(
     caches.match(event.request)
     .then(response => {
@@ -71,3 +70,23 @@ self.addEventListener('fetch', event => {
     })
   );
 });
+
+// Functions
+
+const log = (message) => {
+  console.log(`[${staticCacheName}] ${message}`);
+};
+
+const sendVersion = (event) => {
+  event.waitUntil(async function() {
+    if (event.clientId) {
+      const client = await clients.get(event.clientId);
+      if (client) {
+        client.postMessage({
+          msg: staticCacheName,
+          url: event.request.url,
+        });
+      }
+    }
+  }());
+};
