@@ -6,8 +6,7 @@
   "scripts": {
     "start": "parcel client/index.html",
     "open": "parcel client/index.html --open",
-    "build-local": "parcel build client/index.html",
-    "build-prod": "parcel build client/index.html --public-url ./"
+    "build": "parcel build --no-content-hash client/index.html --public-url ./"
   },
   "dependencies": {
     "@orbit/coordinator": "^0.16.4",

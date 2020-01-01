@@ -1,25 +1,30 @@
 const staticCacheName = '1.0.0';
 
 const filesToCache = [
+  // common
   '/',
+  'deleteDB.html',
+  'index.html',
+  'service-worker.js',
+  'service-worker.js.map',
+
+  // dev
+  'base.f602a789.js',
+  'base.f602a789.js.map',
+
+  // build-prod
   'app.a6a4d504.js',
   'app.a6a4d504.js.map',
   'base.f602a789.css',
   'base.f602a789.css.map',
-  'base.f602a789.js',
-  'base.f602a789.js.map',
   'bg.5e36bef1.png',
-  'deleteDB.html',
   'dom.b63646c9.js',
   'dom.b63646c9.js.map',
   'favicon.21b6e204.ico',
-  'index.html',
   'main.d4190f58.css',
   'main.d4190f58.css.map',
   'main.d4190f58.js',
   'main.d4190f58.js.map',
-  'service-worker.js',
-  'service-worker.js.map',
 ];
 
 self.addEventListener('install', event => {
