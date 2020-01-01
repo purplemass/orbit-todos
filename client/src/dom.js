@@ -24,6 +24,8 @@
   }
 
   const syncIt = async () => {
+    await processQueue();
+
     const element = document.getElementById('syncIt');
     element.classList.add('highlight');
     await remote
@@ -137,7 +139,7 @@
 
     var label = document.createElement('label');
     label.appendChild( document.createTextNode(todo.attributes.name));
-    let remoteId = todo.keys ? todo.keys.remoteId : 'xxx';
+    let remoteId = todo.keys ? todo.keys.remoteId : 'not synced';
     let copy = '<strong>' + todo.attributes.name + '</strong>';
     copy += ' <span class="remote-id">ID: ' + remoteId + '</span>';
     label.innerHTML = copy;
