@@ -49,7 +49,6 @@
 }
 
 #version-wrapper {
-  position: fixed;
   margin: -16px 5px 0 0;
   color: #777;
   font-size: 10px;

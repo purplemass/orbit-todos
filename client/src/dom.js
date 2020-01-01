@@ -110,6 +110,7 @@
 
   // User has double clicked a todo, display an input so they can edit the name
   function todoDblClicked(todo) {
+    refreshUI();
     const div = document.getElementById('li_' + todo.id);
     const inputEditTodo = document.getElementById('input_' + todo.id);
     div.className = 'editing';
@@ -143,7 +144,9 @@
     let copy = '<strong>' + todo.attributes.name + '</strong>';
     copy += ' <span class="remote-id">ID: ' + remoteId + '</span>';
     label.innerHTML = copy;
-    label.addEventListener('dblclick', todoDblClicked.bind(this, todo));
+    // double-click doesn't work on mobile devices
+    // label.addEventListener('dblclick', todoDblClicked.bind(this, todo));
+    label.addEventListener('click', todoDblClicked.bind(this, todo));
 
     var deleteLink = document.createElement('button');
     deleteLink.className = 'destroy';
