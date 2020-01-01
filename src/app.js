@@ -28,7 +28,7 @@ window.remote = new JSONAPISource({
   keyMap,
   name: "remote",
   // host: 'http://localhost:8000',
-  host: 'http://jamshift.com:8080',
+  host: 'https://jamshift.com/api',
   SerializerClass: CustomJSONAPISerializer
 });
 window.coordinator = new Coordinator({

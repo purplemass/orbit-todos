@@ -5,7 +5,8 @@
   "main": "index.html",
   "scripts": {
     "start": "parcel index.html --open",
-    "build": "parcel build index.html"
+    "build-local": "parcel build index.html",
+    "build-prod": "parcel build index.html --public-url https://jamshift.com/todos/"
   },
   "dependencies": {
     "@orbit/coordinator": "^0.16.4",
