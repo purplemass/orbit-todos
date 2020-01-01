@@ -69,5 +69,9 @@ const loadServiceWorker = () => {
   }
 }
 
-// loadServiceWorker();
-loadData();
+(() => {
+
+  loadServiceWorker();
+  loadData();
+
+})();

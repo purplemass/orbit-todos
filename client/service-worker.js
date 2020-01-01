@@ -2,20 +2,33 @@ const staticCacheName = 'v1.0.0';
 
 const filesToCache = [
   '/',
-  '/app.a6a4d504.js',
-  '/base.f602a789.css',
-  '/base.f602a789.js',
-  '/bg.5e36bef1.png',
-  '/dom.b63646c9.js',
-  '/favicon.21b6e204.ico',
-  '/index.html',
-  '/main.d4190f58.css',
-  '/main.d4190f58.js',
-  '/service-worker.js',
+  'app.a6a4d504.js',
+  'app.a6a4d504.js.map',
+  'base.f602a789.css',
+  'base.f602a789.css.map',
+  'base.f602a789.js',
+  'base.f602a789.js.map',
+  'bg.5e36bef1.png',
+  'deleteDB.html',
+  'dom.b63646c9.js',
+  'dom.b63646c9.js.map',
+  'favicon.21b6e204.ico',
+  'index.html',
+  'main.d4190f58.css',
+  'main.d4190f58.css.map',
+  'main.d4190f58.js',
+  'main.d4190f58.js.map',
+  'service-worker.js',
+  'service-worker.js.map',
 ];
 
+const log = (message) => {
+  console.log(`[${staticCacheName}] ${message}`);
+};
+
 self.addEventListener('install', event => {
-  console.log('sw: install', staticCacheName);
+  log('install');
+
   event.waitUntil(
     caches.open(staticCacheName).then(cache => cache.addAll(filesToCache))
   );
@@ -24,7 +37,8 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', function(event) {
-  console.log('sw: activate');
+  log('activate');
+
   // delete any caches that aren't in staticCacheName
   event.waitUntil(
     caches.keys().then(keys => Promise.all(
@@ -39,20 +53,21 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', event => {
-  console.log('sw: fetch', event.request.url);
+  log(`fetch ${event.request.url}`);
+
   event.respondWith(
     caches.match(event.request)
     .then(response => {
       if (response) {
-        // console.log('sw: found ', event.request.url, ' in cache');
+        // log(`found ${event.request.url} in cache'`);
         return response;
       }
 
-      // console.log('sw: network request for ', event.request.url);
+      // log(`network request for ${event.request.url}`);
       return fetch(event.request)
 
     }).catch(error => {
-      console.log('sw: error', error);
+      log(`error: ${error}`);
     })
   );
 });
