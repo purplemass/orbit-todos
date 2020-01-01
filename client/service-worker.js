@@ -1,12 +1,13 @@
-const staticCacheName = '1.0.0';
+const staticCacheName = '1.0.1';
+const serverPrefix = '/todos/'
 
-const filesToCache = [
+let filesToCache = [
   // common
   '/',
   'deleteDB.html',
   'index.html',
-  'service-worker.js',
-  'service-worker.js.map',
+  // 'service-worker.js',
+  // 'service-worker.js.map',
 
   // dev
   'base.f602a789.js',
@@ -30,11 +31,21 @@ const filesToCache = [
 self.addEventListener('install', event => {
   log('install');
 
-  event.waitUntil(
-    caches.open(staticCacheName).then(cache => cache.addAll(filesToCache))
-  );
+  if (event.target.registration.scope.indexOf('https') > -1) {
+    filesToCache = filesToCache.map(file => {
+      if (file !== '/') {
+        file = `${serverPrefix}${file}`;
+      }
+      return file;
+    });
+    filesToCache.push(serverPrefix);
+  }
 
-  self.skipWaiting();
+  event.waitUntil(
+    caches.open(staticCacheName)
+      .then(cache => cache.addAll(filesToCache))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', function(event) {
@@ -50,29 +61,31 @@ self.addEventListener('activate', function(event) {
       })
     ))
   );
+
   // return self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
-  // log(`fetch ${event.request.url}`);
+  log(`fetch ${event.request.url}`);
 
   sendVersion(event);
 
   // handle caching
   event.respondWith(
     caches.match(event.request)
-    .then(response => {
-      if (response) {
-        // log(`found ${event.request.url} in cache'`);
-        return response;
-      }
+      .then(response => {
 
-      // log(`network request for ${event.request.url}`);
-      return fetch(event.request)
+        if (response) {
+          // log(`found ${event.request.url} in cache'`);
+          return response;
+        }
 
-    }).catch(error => {
-      log(`error: ${error}`);
-    })
+        // log(`network request for ${event.request.url}`);
+        return fetch(event.request)
+
+      }).catch(error => {
+        log(`error: ${error}`);
+      })
   );
 });
 
