@@ -31,6 +31,7 @@ let filesToCache = [
 self.addEventListener('install', event => {
   log('install');
 
+  // add serverPrefix to paths when on server (https)
   if (event.target.registration.scope.indexOf('https') > -1) {
     filesToCache = filesToCache.map(file => {
       if (file !== '/') {
@@ -44,7 +45,7 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(staticCacheName)
       .then(cache => cache.addAll(filesToCache))
-      .then(() => self.skipWaiting())
+      // .then(() => self.skipWaiting())
   );
 });
 

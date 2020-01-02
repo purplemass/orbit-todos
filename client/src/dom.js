@@ -10,7 +10,6 @@
   const todosDom = document.getElementById('todo-list');
 
   addEventListeners();
-  // setTimeout(() => refreshUI().then(() => syncIt()), 100);
   setTimeout(() => refreshUI(), 100);
   setTimeout(() => syncIt(), 500);
 
@@ -25,6 +24,7 @@
     );
     // console.log('memory:', todos.length);
     todosDom.innerHTML = '';
+
     // sort remoteID alphabetically
     todos.sort((a, b) => {
       if (!a.keys) {
