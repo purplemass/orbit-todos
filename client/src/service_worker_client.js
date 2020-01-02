@@ -27,14 +27,27 @@
           // An updated service worker has appeared in reg.installing!
           newWorker = reg.installing;
           newWorker.addEventListener('statechange', () => {
+            console.log(newWorker.state);
+
             // Has service worker state changed?
             switch (newWorker.state) {
+
               case 'installed':
                 // There is a new service worker available, show the notification
                 if (navigator.serviceWorker.controller) {
                   notification.classList.remove('hide');
                 }
                 break;
+
+              case 'activated':
+                // If there no version it means this is the first time
+                // our service worker is activated - reload to load cache
+                const version = document.getElementById('version');
+                if (version.innerHTML === '') {
+                  window.location.reload();
+                }
+                break;
+
             }
           });
 
