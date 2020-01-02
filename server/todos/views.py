@@ -12,15 +12,8 @@ class TodoViewSet(viewsets.ModelViewSet):
     API endpoint that allows todos to be viewed or edited.
     """
     resource_name = 'todos'
-    queryset = Todo.objects.all().order_by('name')
+    queryset = Todo.objects.all().order_by('-id')
     serializer_class = TodoSerializer
-
-    def post(self, request, pk):
-        print(pk)
-        return Response({})
-
-    # def list(self, request):
-    #     return Response({})
 
 
 class TodoUuidViewSet(viewsets.ModelViewSet):

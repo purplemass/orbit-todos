@@ -1,4 +1,4 @@
-const staticCacheName = '1.0.4';
+const staticCacheName = '0.0.1';
 const serverPrefix = '/todos/'
 
 let filesToCache = [

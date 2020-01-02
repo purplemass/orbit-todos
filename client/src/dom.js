@@ -4,6 +4,8 @@
   'use strict';
 
   const ENTER_KEY = 13;
+  const MISSING_REMOTE_ID = 'not synced';
+
   const newTodoDom = document.getElementById('new-todo');
   const todosDom = document.getElementById('todo-list');
 
@@ -17,10 +19,25 @@
   // -------------------------------------------------------------------
 
   const refreshUI = async () => {
-    const todos = memory.cache.query(q => q.findRecords('todo').sort('name'));
+    const todos = memory.cache.query(q => q
+      .findRecords('todo')
+      .filter({ attribute: 'deleted', value: false })
+    );
     // console.log('memory:', todos.length);
     todosDom.innerHTML = '';
-    todos.forEach(p => UI(p));
+    // sort remoteID alphabetically
+    todos.sort((a, b) => {
+      if (!a.keys) {
+        a.keys = {};
+        a.keys.remoteId = MISSING_REMOTE_ID;
+      }
+      if (!b.keys) {
+        b.keys = {};
+        b.keys.remoteId = MISSING_REMOTE_ID;
+      }
+      return (a.keys.remoteId < b.keys.remoteId) ? 1 : -1;
+    });
+    todos.forEach(todo => UI(todo));
   }
 
   const syncIt = async () => {
@@ -29,7 +46,7 @@
     const element = document.getElementById('syncIt');
     element.classList.add('highlight');
     await remote
-      .query(q => q.findRecords('todo').sort('name'))
+      .query(q => q.findRecords('todo'))
       .then(todos => console.log('remote:', todos.length))
       .then(() => refreshUI())
       .then(() => element.classList.remove('highlight'))
@@ -126,9 +143,7 @@
   }
 
   function UI(todo, id) {
-    if (todo && todo.attributes.deleted === false) {
-      todosDom.appendChild(createTodoListItem(todo));
-    }
+    todosDom.appendChild(createTodoListItem(todo));
   }
 
   function createTodoListItem(todo) {
@@ -139,9 +154,9 @@
 
     var label = document.createElement('label');
     label.appendChild( document.createTextNode(todo.attributes.name));
-    let remoteId = todo.keys ? todo.keys.remoteId : 'not synced';
+    let remoteId = todo.keys.remoteId !== MISSING_REMOTE_ID ? `ID: ${todo.keys.remoteId}` : MISSING_REMOTE_ID;
     let copy = '<strong>' + todo.attributes.name + '</strong>';
-    copy += ' <span class="remote-id">ID: ' + remoteId + '</span>';
+    copy += ' <span class="remote-id">' + remoteId + '</span>';
     label.innerHTML = copy;
     // double-click doesn't work on mobile devices
     // label.addEventListener('dblclick', todoDblClicked.bind(this, todo));
