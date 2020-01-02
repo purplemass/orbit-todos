@@ -1,4 +1,4 @@
-const staticCacheName = '0.0.2';
+const staticCacheName = '0.0.3';
 const serverPrefix = '/todos/'
 
 let filesToCache = [
@@ -45,11 +45,10 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(staticCacheName)
       .then(cache => cache.addAll(filesToCache))
-      // .then(() => self.skipWaiting())
   );
 });
 
-self.addEventListener('activate', function(event) {
+self.addEventListener('activate', event => {
   log('activate');
 
   // delete any caches that aren't in staticCacheName
@@ -88,6 +87,12 @@ self.addEventListener('fetch', event => {
         log(`error: ${error}`);
       })
   );
+});
+
+self.addEventListener('message', event => {
+  if (event.data.action === 'skipWaiting') {
+    self.skipWaiting();
+  }
 });
 
 // Functions

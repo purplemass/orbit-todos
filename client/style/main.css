@@ -28,8 +28,7 @@
 }
 
 .button-small {
-  width: 90px;
-  padding: 5px;
+  padding: 3px 8px;
   margin: 0 0 5px;
   background-color: #777;
   border-radius: .5rem;
@@ -61,7 +60,7 @@
   background-color: #000;
 }
 
-#refreshDiv {
+#notification-wrapper {
   height: 19px;
   text-align: center;
 }
