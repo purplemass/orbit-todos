@@ -133,10 +133,16 @@
     inputEditTodo.focus();
   }
 
+  function todoDblClickedCancel() {
+    refreshUI();
+  }
+
+
   // -------------------------------------------------------------------
 
   function addEventListeners() {
     newTodoDom.addEventListener('keypress', newTodoKeyPressHandler, false);
+    newTodoDom.addEventListener('click', todoDblClickedCancel, false);
     document.getElementById('syncIt').addEventListener('click', () => syncIt(this));
     document.getElementById('refreshUI').addEventListener('click', () => refreshUI(this));
     document.getElementById('processQueue').addEventListener('click', () => processQueue(this));
