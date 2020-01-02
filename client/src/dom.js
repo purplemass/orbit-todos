@@ -44,14 +44,17 @@
     await processQueue();
 
     const element = document.getElementById('syncIt');
-    element.classList.add('highlight');
+    element.classList.remove('button-danger');
+    element.classList.add('button-highlight');
     await remote
       .query(q => q.findRecords('todo'))
       .then(todos => console.log('remote:', todos.length))
       .then(() => refreshUI())
-      .then(() => element.classList.remove('highlight'))
+      .then(() => element.classList.remove('button-highlight'))
       .catch(e => {
         // errors caught by remoteQueryFail
+        element.classList.remove('button-highlight');
+        element.classList.add('button-danger');
       });
   };
 

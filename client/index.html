@@ -14,11 +14,20 @@
       <button class="button-big button-primary" id="syncIt">Sync with server</button>
 
       <a href="deleteDB.html">
-        <button class="button-big button-danger" id="deleteDB">Delete local data</button>
+        <button class="button-big button-primary" id="deleteDB">Delete local data</button>
       </a>
-      <button class="button-big" id="refreshUI">Refesh</button>
 
-      <button class="button-big" id="processQueue">Process Queue</button>
+      <button class="button-big hide" id="refreshUI">Refesh</button>
+
+      <button class="button-big hide" id="processQueue">Process Queue</button>
+
+    </div>
+
+    <div id="refreshDiv">
+      <div id="refreshLine" class="hide1">
+        <small>A new version of QTRA-todos application is available</small>
+        <button class="button-small button-action" id="reloadPage">REFRESH</button>
+      </div>
     </div>
 
     <section id="todoapp">

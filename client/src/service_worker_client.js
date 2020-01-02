@@ -18,6 +18,7 @@
         const version = document.getElementById('version');
         version.innerHTML = event.data.msg;
       });
+
     }
   }
 

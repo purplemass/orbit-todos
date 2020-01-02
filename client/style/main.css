@@ -1,3 +1,6 @@
+.hide {
+  display: none;
+}
 
 .remote-id {
   float: right;
@@ -24,28 +27,47 @@
   outline: none;
 }
 
+.button-small {
+  width: 90px;
+  padding: 5px;
+  margin: 0 0 5px;
+  background-color: #777;
+  border-radius: .5rem;
+  border: 2px solid #e2e8f0;
+  color: #FFF;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+}
+
 .button-primary {
   background-color: #4299e1;
 }
 
-.button-danger {
-  background-color: red;
+.button-action {
+  background-color: #2ECC40;
 }
 
-.highlight {
+.button-warning {
+  background-color: #FF851B;
+}
+
+.button-danger {
+  background-color: #FF4136;
+}
+
+.button-highlight {
   background-color: #000;
+}
+
+#refreshDiv {
+  height: 19px;
+  text-align: center;
 }
 
 #instructions {
   font-size: 10px;
-}
-
-#refreshUI {
-  display: none;
-}
-
-#processQueue {
-  display: none;
 }
 
 #version-wrapper {
