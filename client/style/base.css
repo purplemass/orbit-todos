@@ -225,6 +225,7 @@ label[for='toggle-all'] {
   bottom: 0;
   margin: auto 0;
   border: none; /* Mobile Safari */
+  outline: none;
   -webkit-appearance: none;
   /*-moz-appearance: none;*/
   -ms-appearance: none;
@@ -276,6 +277,7 @@ label[for='toggle-all'] {
   margin: auto 0;
   font-size: 22px;
   color: #a88a8a;
+  outline: none;
   -webkit-transition: all 0.2s;
   -moz-transition: all 0.2s;
   -ms-transition: all 0.2s;
