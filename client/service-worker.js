@@ -1,4 +1,4 @@
-const staticCacheName = '0.0.4';
+const staticCacheName = 'B 0.0.5';
 const serverPrefix = '/todos/'
 
 let filesToCache = [
@@ -6,8 +6,8 @@ let filesToCache = [
   '/',
   'deleteDB.html',
   'index.html',
-  // 'service-worker.js',
-  // 'service-worker.js.map',
+  'service_worker_client.6231035a.js',
+  'service_worker_client.6231035a.js.map',
 
   // dev
   'base.f602a789.js',
@@ -34,12 +34,10 @@ self.addEventListener('install', event => {
   // add serverPrefix to paths when on server (https)
   if (event.target.registration.scope.indexOf('https') > -1) {
     filesToCache = filesToCache.map(file => {
-      if (file !== '/') {
-        file = `${serverPrefix}${file}`;
-      }
+      file = `${serverPrefix}${file}`;
+      file = file.replace('//', '/');
       return file;
     });
-    filesToCache.push(serverPrefix);
   }
 
   event.waitUntil(
@@ -55,7 +53,7 @@ self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => Promise.all(
       keys.map(key => {
-        if (!staticCacheName.includes(key)) {
+        if (key.startsWith('B') && !staticCacheName.includes(key)) {
           return caches.delete(key);
         }
       })
@@ -74,17 +72,11 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-
-        if (response) {
-          // log(`found ${event.request.url} in cache'`);
-          return response;
-        }
-
-        // log(`network request for ${event.request.url}`);
-        return fetch(event.request)
-
+        return response || fetch(event.request);
       }).catch(error => {
-        log(`error: ${error}`);
+        log(`error: ${error} [${event.request.url}]`);
+        log(`Redirect to [${filesToCache[0]}]`);
+        return caches.match(filesToCache[0]);
       })
   );
 });
