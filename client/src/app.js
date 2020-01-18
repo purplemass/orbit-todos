@@ -27,8 +27,7 @@ window.remote = new JSONAPISource({
   schema,
   keyMap,
   name: 'remote',
-  host: 'http://localhost:8000/api',
-  // host: 'https://jamshift.com/api',
+  host: '/api-orbit',
   SerializerClass: CustomJSONAPISerializer
 });
 window.coordinator = new Coordinator({

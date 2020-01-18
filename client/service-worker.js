@@ -1,5 +1,5 @@
-const staticCacheName = 'B 0.0.5';
-const serverPrefix = '/todos/'
+const staticCacheName = 'B 0.1.0';
+const serverPrefix = '/orbit/'
 
 let filesToCache = [
   // common
